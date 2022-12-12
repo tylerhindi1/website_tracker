@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container">
+    {% if user.is_authenticated %}
+    <h1>User Track Record</h1>
+
+  <h2>Daily Visit Summaries</h2>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Visits</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for daily_visit in track.daily_visits.all %}
+        <tr>
+          <td>{{ daily_visit.date|date:"F j, Y" }}</td>
+          <td>{{ daily_visit.visits }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Monthly Visit Summaries</h2>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Month</th>
+        <th>Year</th>
+        <th>Visits</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for monthly_visit in track.monthly_visits.all %}
+        <tr>
+          <td>{{ monthly_visit.month }}</td>
+          <td>{{ monthly_visit.year }}</td>
+          <td>{{ monthly_visit.visits }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Yearly Visit Summaries</h2>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Year</th>
+        <th>Visits</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for yearly_visit in track.yearly_visits.all %}
+        <tr>
+          <td>{{ yearly_visit.year }}</td>
+          <td>{{ yearly_visit.visits }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% else %}
+  <p >You must be logged in to view your track record.</p>
+    {% endif %}
+</div>
+
+
+{% endblock %}
