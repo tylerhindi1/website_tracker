@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.utils.text import slugify
+from datetime import datetime
 
 
 class TokenSummary(models.Model):
@@ -48,8 +49,20 @@ class UserLocation(models.Model):
     map_link = models.CharField(max_length=256, blank=True, null=True)
     date = models.DateTimeField(auto_now_add=True)
     time = models.TimeField(auto_now_add=True)
+    user_agent = models.CharField(max_length=256, blank=True, null=True)
+
     def __str__(self):
         return f"User: {self.author}"
+
+    def save(self, *args, **kwargs):
+        # set the date to the current time and date
+        self.date = datetime.now()
+
+        # format the date using the strftime method
+        datetamp_str = self.date.strftime("%d/%m/%Y")
+
+        # save the model instance
+        super().save(*args, **kwargs)
 
     
 

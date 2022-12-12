@@ -288,6 +288,8 @@ def send_location(request, token):  # sourcery skip: low-code-quality
         map_link = f"https://www.google.com/maps/@{lat},{lon}"
     else:
         map_link = ""
+        user_agent = request.headers.get("User-Agent")
+
     
 
     user_location = UserLocation(
@@ -312,6 +314,8 @@ def send_location(request, token):  # sourcery skip: low-code-quality
         hosting=hosting,
         ip_address=ip_address,
         map_link=map_link,
+        user_agent=user_agent,
+        
         
     )
     # Save the UserLocation object to the database
