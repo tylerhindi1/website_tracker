@@ -1,8 +1,9 @@
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.utils.text import slugify
-from datetime import datetime
+from datetime import datetime,date
 
 
 class TokenSummary(models.Model):
@@ -22,7 +23,6 @@ def generate_link(sender, instance, **kwargs):
     slug = slugify(token)
     link = f"{server_address}/location/{slug}"
     instance.link = link
-
 
 
 class UserLocation(models.Model):
@@ -64,5 +64,23 @@ class UserLocation(models.Model):
         # save the model instance
         super().save(*args, **kwargs)
 
-    
+
+
+####################################################################################
+
+
+
+class VisitCount(models.Model):
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    visit_count = models.IntegerField(default=0)
+    today = models.DateField(default=date.today())
+    today_total = models.IntegerField(default=0)
+    monthly_total = models.IntegerField(default=0)
+    yearly_total = models.IntegerField(default=0)
+    last_visit_date = models.DateField(default=date.today())
+
+    def __str__(self):
+        return f"User: {self.author}, Visit Count: {self.visit_count}"
+
+
 

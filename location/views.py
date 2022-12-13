@@ -1,3 +1,31 @@
+"""
+
+
+
+
+
+it is work for  daily visit but not for monthly and yearly visit 
+
+
+
+
+
+
+
+
+"""
+
+
+
+
+
+
+
+
+
+
+
+
 import json
 import os
 from sqlite3 import IntegrityError
@@ -6,7 +34,6 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 import secrets
 from django.db import transaction
-
 import random
 import string
 import calendar
@@ -16,7 +43,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from datetime import datetime
+from datetime import date, datetime
 from .forms import UserCreateForm
 from .models import *
 
@@ -117,11 +144,14 @@ def register(request):  # sourcery skip: extract-method
 @login_required
 def user_track(request):
     # Get the track record for the authenticated user, or create a new one if it doesn't exist
-    track, created = Track.objects.get_or_create(author=request.user)
+    track, created = VisitCount.objects.get_or_create(author=request.user)
+    userdata = UserLocation.objects.all()
+    
+
 
     if request.user.is_authenticated:
         # If the user is authenticated, render the 'user_track.html.' template
-        return render(request, 'user_track.html', {'track': track})
+        return render(request, 'user_track.html', {'track': track,'userdata':userdata})
     else:
         # If the user is not authenticated, redirect to the home page
         return redirect('home')
@@ -147,16 +177,31 @@ def send_location(request, token):  # sourcery skip: low-code-quality
 
     # Get the user's submitted chat ID from the database
     token_summary = TokenSummary.objects.get(token=token)
+    # chat id is used to sent message to login user
+    chat_id = token_summary.chat_id 
 
-    
-    chat_id = token_summary.chat_id
-    
-    
-    # Get the user associated with the token
+    # Get the user associated with the token 
+    # this author is used to get the user's track record
     author = token_summary.author
 
+    current_url = token_summary.link
+
+    # Get the current date
+    today = date.today()
+    
     # Get the current time
     current_time = datetime.now()
+
+  #  current_time_str = datetime.now()
+ #   current_time = current_time_str.strftime('%Y-%m-%d %H:%M:%S')
+
+
+    print(current_time)
+    # Create a new Visit object using the create_visit function
+    create_visit(author)
+
+   
+  
 
 
     # Use the 'ip-api.com' API to get the user's location
@@ -166,7 +211,8 @@ def send_location(request, token):  # sourcery skip: low-code-quality
 
 
     # Print the response headers to check the remaing limit
-    print(ip_response.headers)
+    
+    #print(ip_response.headers)
 
 
     # Parse the response and extract the user's location
@@ -315,11 +361,11 @@ def send_location(request, token):  # sourcery skip: low-code-quality
         ip_address=ip_address,
         map_link=map_link,
         user_agent=user_agent,
-        
+
         
     )
     # Save the UserLocation object to the database
-    user_location.save()
+    user_location.save(request)
 
     # Use the 'sendMessage' method of the Telegram Bot API
     # to send the location information to the recipient
@@ -383,3 +429,79 @@ def token_summary(request):
     return render(request, 'token_summary.html', context)
 
 
+
+
+#########################################################################################################
+
+
+
+
+
+def create_visit(author):
+    # sourcery skip: hoist-similar-statement-from-if, hoist-statement-from-if
+    # Get the track record for the authenticated user, or create a new one if it doesn't exist
+    visit, created = VisitCount.objects.get_or_create(
+        author=author,
+        today=date.today(),
+    )
+
+    # Get the current date and time
+    current_date = datetime.now().date()
+    print('---------------------')
+    print(visit.visit_count)
+    #increse the total visit count
+    visit.visit_count += 1
+    print(visit.visit_count)
+    print('---------------------')
+
+    print(visit.last_visit_date)
+    print(current_date)
+
+    # Check if the last visit was on the same day as the current visit
+    if visit.last_visit_date == current_date:
+        
+        # If the last visit was on the same day, increment the daily visit count
+        print('--------- total count ------------')
+        print(visit.today_total)
+        visit.today_total += 1
+        print(visit.today_total)
+        print('---------------------')
+
+    else:
+        # If the last visit was not on the same day, reset the daily visit count
+        print('-------- today total count -------------')
+        print(visit.today_total)
+        visit.today_total = 1
+        print(visit.today_total)
+        print('---------------------')
+        
+
+    # Check if the last visit was in the same month as the current visit
+    if visit.last_visit_date.month == current_date.month:
+        # If the last visit was in the same month, increment the monthly visit count
+        print('--------  if conditon monthly total count -------------')
+        print(visit.monthly_total)
+        visit.monthly_total += 1
+        print(visit.monthly_total)
+        print('---------------------')
+    else:
+        # If the last visit was not in the same month, reset the monthly visit count
+        print('--------  else conditon monthly total count -------------')
+        print(visit.monthly_total)
+        visit.monthly_total = 1
+        print(visit.monthly_total)
+        print('---------------------')
+
+    # Check if the last visit was in the same year as the current visit
+    if visit.last_visit_date.year == current_date.year:
+        # If the last visit was in the same year, increment the yearly visit count
+        visit.yearly_total += 1
+    else:
+        # If the last visit was not in the same year, reset the yearly visit count
+        visit.yearly_total = 1
+
+    # Update the last visit date
+    visit.last_visit_date = current_date
+
+    # Save the updated visit count to the database
+    visit.save()

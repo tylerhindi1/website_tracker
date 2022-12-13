@@ -2,73 +2,90 @@
 
 {% block content %}
 
-<div class="container">
-    {% if user.is_authenticated %}
-    <h1>User Track Record</h1>
+<!-- Font Awesome -->
+<link
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+  rel="stylesheet"
+/>
+<!-- Google Fonts -->
+<link
+  href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+  rel="stylesheet"
+/>
+<!-- MDB -->
+<link
+  href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.0.1/mdb.min.css"
+  rel="stylesheet"
+/>
 
-  <h2>Daily Visit Summaries</h2>
 
-  <table class="table">
+
+<div  class="table-responsive" >
+
+
+  <table  class="table table-bordered  table-striped table-sm">
     <thead>
       <tr>
+        <th>Continent</th>
+        <th>Country</th>
+        <th>Region Name</th>
+        <th>City</th>
+        <th>District</th>
+        <th>Zip Code</th> 
+        <th>IP Address</th>
+        <th>Map Link</th>
         <th>Date</th>
-        <th>Visits</th>
+        <th>Time</th>
+        <th>User Agent</th>
       </tr>
     </thead>
     <tbody>
-      {% for daily_visit in track.daily_visits.all %}
-        <tr>
-          <td>{{ daily_visit.date|date:"F j, Y" }}</td>
-          <td>{{ daily_visit.visits }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  <h2>Monthly Visit Summaries</h2>
-
-  <table class="table">
-    <thead>
+      {% for location in userdata %}
       <tr>
-        <th>Month</th>
-        <th>Year</th>
-        <th>Visits</th>
+        <td>{{ location.continent }}</td>
+        <td>{{ location.country }}</td>
+        <td>{{ location.region_name }}</td>
+        <td>{{ location.city }}</td>
+        <td>{{ location.district }}</td>
+        <td>{{ location.zip_code }}</td>
+        <td>{{ location.ip_address }}</td>
+        <td><a href="https://www.google.com/maps/place/{{ location.latitude }},{{ location.longitude }}" target="_blank">Map Link</a></td>
+        <td>{{ location.date|date:"F j, Y" }}</td>
+        <td>{{ location.time }}</td>
+        <td>{{ location.user_agent }}</td>
       </tr>
-    </thead>
-    <tbody>
-      {% for monthly_visit in track.monthly_visits.all %}
-        <tr>
-          <td>{{ monthly_visit.month }}</td>
-          <td>{{ monthly_visit.year }}</td>
-          <td>{{ monthly_visit.visits }}</td>
-        </tr>
       {% endfor %}
     </tbody>
   </table>
+  
 
-  <h2>Yearly Visit Summaries</h2>
 
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Year</th>
-        <th>Visits</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for yearly_visit in track.yearly_visits.all %}
-        <tr>
-          <td>{{ yearly_visit.year }}</td>
-          <td>{{ yearly_visit.visits }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  {% else %}
-  <p >You must be logged in to view your track record.</p>
-    {% endif %}
 </div>
+
+
+
+
+
+
+      
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 {% endblock %}
