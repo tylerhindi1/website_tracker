@@ -85,6 +85,9 @@ def generate_link(sender, instance, **kwargs):
     link = f"http://{server_address}/location/{slug}"
     instance.link = link
 
+
+
+
 def register(request):  # sourcery skip: extract-method
     if request.method == "GET":
         return render(request, "registration/register.html", {"form": UserCreateForm})
@@ -92,7 +95,7 @@ def register(request):  # sourcery skip: extract-method
         # If the passwords do not match, display an error message
         return render(
             request,
-            "registration/register.html",
+            "registration/register.html", 
             {"form": UserCreateForm, "error": "Passwords do not match"},
         )
 
@@ -108,7 +111,9 @@ def register(request):  # sourcery skip: extract-method
     try:
         # Create a new User object using the form data
         author = User.objects.create_user(
-            request.POST["username"], password=request.POST["password1"]
+            request.POST["username"], 
+            password=request.POST["password1"]
+
         )
         login(request, author)
 
@@ -137,6 +142,13 @@ def register(request):  # sourcery skip: extract-method
             "registration/register.html",
             {"form": UserCreateForm, "error": "Username already taken. Choose new username."},
         )
+
+
+
+
+
+
+
 
 
 
@@ -200,8 +212,6 @@ def send_location(request, token):  # sourcery skip: low-code-quality
     # Create a new Visit object using the create_visit function
     create_visit(author)
 
-   
-  
 
 
     # Use the 'ip-api.com' API to get the user's location

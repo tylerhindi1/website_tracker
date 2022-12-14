@@ -46,6 +46,7 @@
 
 <!-- Define the code block that will be copied when the button is clicked -->
 <pre id="code-block">
+&lt;script&gt;
     function sendRequest(url) {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url, false);
@@ -54,6 +55,7 @@
     }
     var response = sendRequest('{{token_summary.link}}');
   }
+ &lt;/script&gt; 
 </pre>
 
 <!-- Create a button to copy the code block to the clipboard -->
