@@ -5,7 +5,7 @@ from .views import *
 
 urlpatterns = [
     path('',home,name='home'),
-    
+    path("contact/",contact,name='contact'),
     path("location/<token>/", send_location, name="send_location"),
     path("register/", register, name="register"),
     path("login/", login_view, name="login"),

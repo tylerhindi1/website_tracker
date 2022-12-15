@@ -1,103 +1,78 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Token Summary</h1>
-
-    {% if user.is_authenticated %}
-    <p>Your website track link: <a href="{{token_summary.link}}">{{token_summary.link}}</a></p>
-
-
-
-    {% else %}
-        <p>You need to <a href="{% url 'login' %}" class="btn btn-primary">login</a> to see your token.</p>
-    {% endif %}
-
-
-    {% if token_summary.chat_id %}
-    <p>Your chat ID: {{ token_summary.chat_id }}</p>
-    <form method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="chat_id">Chat ID</label>
-            <input type="text" class="form-control" id="chat_id" name="chat_id" value="{{ token_summary.chat_id }}">
+ 
+<section class="py-5">
+    <section class="py-5">
+      <div class="container">
+        <div
+          class="border rounded border-white d-flex flex-column justify-content-between align-items-center flex-lg-row bg-primary-gradient p-4 p-lg-5">
+          <div class="text-center text-lg-start py-3 py-lg-1">
+            <h2 class="fw-bold mb-2">Here You can Update Your Telegram Chat ID</h2>
+          </div>
+          <form class="d-flex justify-content-center flex-wrap flex-lg-nowrap" method="POST">
+            {% csrf_token %}
+            <div class="my-2"><input class="form-control" type="text" id="chat_id" name="chat_id"
+                placeholder="{{ token_summary.chat_id }}" required>
+            </div>
+            <div class="my-2"><button class="btn btn-primary shadow ms-2" type="submit">Update</button></div>
+          </form>
         </div>
-        <button type="submit" class="btn btn-primary">Update</button>
-    </form>
-{% else %}
-    <form method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="chat_id">Enter your chat ID</label>
-            <input type="text" class="form-control" id="chat_id" name="chat_id" value="{{ token_summary.chat_id }}">
+        <div></div>
+      </div>
+      <section>
+        <div class="container py-4 py-xl-5">
+          <div class="mx-auto" style="max-width: 900px;">
+            <div class="row row-cols-1 row-cols-md-2 d-flex justify-content-center">
+              <div class="col-md-10 col-lg-10 col-xl-10 mb-4">
+                <div class="card bg-info-light">
+                  <pre id="code-block">
+                      &lt;script&gt;
+                        function sendRequest(url) {
+                          var xhr = new XMLHttpRequest();
+                          xhr.open('GET', url, false);
+                          xhr.send();
+                          return xhr.responseText;
+                            }
+                          var response = sendRequest('{{token_summary.link}}');   
+                      &lt;/script&gt;
+                  </pre>
+                  <button class="btn btn-info btn-sm" id="copy-button" data-clipboard-target="#code-block">Copy code to
+                    clipboard</button>
+                </div>
+                <div id="message"></div>
+              </div>
+            </div>
+          </div>
         </div>
-        <button type="submit" class="btn btn-primary">Save</button>
-    </form>
-{% endif %}
+        <!-- Initialize clipboard.js on the copy button -->
+        <script>
+          var clipboard = new ClipboardJS('#copy-button', {
+            // Prevent the code from being highlighted when the button is clicked
+            trigger: function (trigger) {
+              trigger.setAttribute('aria-label', 'Copy to clipboard');
+              trigger.classList.add('clipboard-button');
+            }
+          });
+          // Add an event listener to display a message when the code is copied
+          clipboard.on('success', function (e) {
+            // Get the message element
+            var message = document.getElementById('message');
 
-<br>
+            // Set the text of the message element
+            message.innerHTML = '<p class="alert alert-success" role="alert" >Code copied to clipboard!</p>';
+            // Add a "beautiful" class to the message element
+            message.classList.add('beautiful');
 
-
-
-
-<!-- Include clipboard.js -->
-<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
-
-
-
-<!-- Define the code block that will be copied when the button is clicked -->
-<pre id="code-block">
-&lt;script&gt;
-    function sendRequest(url) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', url, false);
-        xhr.send();
-        return xhr.responseText;
-    }
-    var response = sendRequest('{{token_summary.link}}');
-  }
- &lt;/script&gt; 
-</pre>
-
-<!-- Create a button to copy the code block to the clipboard -->
-<button  class="btn btn-primary" id="copy-button" data-clipboard-target="#code-block">
-    Copy code to clipboard
-  </button>
-
-
-<!-- Create an element to display the message when the code is copied -->
-<div id="message"></div>
-
-
-  
-
-<!-- Initialize clipboard.js on the copy button -->
-<script>
-    var clipboard = new ClipboardJS('#copy-button', {
-    // Prevent the code from being highlighted when the button is clicked
-    trigger: function(trigger) {
-        trigger.setAttribute('aria-label', 'Copy to clipboard');
-        trigger.classList.add('clipboard-button');
-    }
-    });
-
-  // Add an event listener to display a message when the code is copied
-    clipboard.on('success', function(e) {
-    // Get the message element
-    var message = document.getElementById('message');
-
- // Set the text of the message element
-    message.innerHTML = '<p class="alert alert-success" role="alert" >Code copied to clipboard!</p>';
-
-
-    // Add a "beautiful" class to the message element
-    message.classList.add('beautiful');
-
-    // Hide the message after 1 second
-    setTimeout(function() {
-        message.innerHTML = '';
-    }, 1000);
-});
-</script>
+            // Hide the message after 1 second
+            setTimeout(function () {
+              message.innerHTML = '';
+            }, 1000);
+          });
+        </script>
+      </section>
+    </section>
+  </section>
 
 
 {% endblock %}

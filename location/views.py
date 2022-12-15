@@ -51,7 +51,8 @@ from .models import *
 
 
 
-
+def contact(request):
+    return render(request,'contacts.html')
 
 def home(request):
     return render(request,'home.html')
@@ -91,6 +92,7 @@ def generate_link(sender, instance, **kwargs):
 def register(request):  # sourcery skip: extract-method
     if request.method == "GET":
         return render(request, "registration/register.html", {"form": UserCreateForm})
+
     if request.POST["password1"] != request.POST["password2"]:
         # If the passwords do not match, display an error message
         return render(
@@ -156,14 +158,14 @@ def register(request):  # sourcery skip: extract-method
 @login_required
 def user_track(request):
     # Get the track record for the authenticated user, or create a new one if it doesn't exist
-    track, created = VisitCount.objects.get_or_create(author=request.user)
+    #track, created = VisitCount.objects.get_or_create(author=request.user)
     userdata = UserLocation.objects.all()
     
 
 
     if request.user.is_authenticated:
         # If the user is authenticated, render the 'user_track.html.' template
-        return render(request, 'user_track.html', {'track': track,'userdata':userdata})
+        return render(request, 'user_track.html', {'userdata':userdata})
     else:
         # If the user is not authenticated, redirect to the home page
         return redirect('home')
