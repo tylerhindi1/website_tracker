@@ -1,28 +1,3 @@
-"""
-
-
-
-
-
-it is work for  daily visit but not for monthly and yearly visit 
-
-
-
-
-
-
-
-
-"""
-
-
-
-
-
-
-
-
-
 
 
 
@@ -120,12 +95,12 @@ def register(request):  # sourcery skip: extract-method
         login(request, author)
 
         # Generate a random token with 64 characters
-        token = secrets.token_hex(32)
+        token = secrets.token_hex(8)
 
         # Check if the token already exists in the database
         if TokenSummary.objects.filter(token=token).exists():
             # If the token already exists, generate a new token
-            token = secrets.token_hex(32)
+            token = secrets.token_hex(8)
     
         # Create a new TokenSummary object using the form data
         token_summary = TokenSummary.objects.create(

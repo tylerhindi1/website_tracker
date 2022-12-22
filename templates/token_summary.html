@@ -27,15 +27,15 @@
               <div class="col-md-10 col-lg-10 col-xl-10 mb-4">
                 <div class="card bg-info-light">
                   <pre id="code-block">
-                      &lt;script&gt;
-                        function sendRequest(url) {
-                          var xhr = new XMLHttpRequest();
-                          xhr.open('GET', url, false);
-                          xhr.send();
-                          return xhr.responseText;
-                            }
-                          var response = sendRequest('{{token_summary.link}}');   
-                      &lt;/script&gt;
+  &lt;script&gt;
+    function sendRequest(url) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', url, false);
+      hr.send();
+      return xhr.responseText;
+      }
+    var response = sendRequest('{{token_summary.link}}');   
+  &lt;/script&gt;
                   </pre>
                   <button class="btn btn-info btn-sm" id="copy-button" data-clipboard-target="#code-block">Copy code to
                     clipboard</button>
