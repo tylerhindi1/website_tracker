@@ -1,3 +1,5 @@
 /.env
 /backup codes
 /test.txt
+/.venv
+/runtime.txt
