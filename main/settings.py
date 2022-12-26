@@ -114,15 +114,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
-
-
-
-os.environ['SERVER_ADDRESS'] = '127.0.0.1:8000' 
-os.environ['IPINFO_API_KEY'] = "a4aaf9d0d86e26"
-os.environ['BOT_TOKEN'] = "2046425284:AAGEbPQB0D3UzVh50x278D8qtJVE0LFoMD0"
 
 STATICFILES_DIRS = [
     BASE_DIR,'static'
@@ -130,3 +123,8 @@ STATICFILES_DIRS = [
 
 MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 MEDIA_URL = '/media/'
+
+# system envirement variables
+os.environ['SERVER_ADDRESS'] = 'http://127.0.0.1:8000' 
+os.environ['IPINFO_API_KEY'] = "a4aaf9d0d86e26"
+os.environ['BOT_TOKEN'] = "2046425284:AAGEbPQB0D3UzVh50x278D8qtJVE0LFoMD0"

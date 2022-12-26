@@ -10,7 +10,6 @@ class TokenSummary(models.Model):
     token = models.CharField(max_length=64, unique=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     chat_id = models.CharField(max_length=64,default=0)
-    token_count = models.IntegerField(default=0)
     link = models.CharField(max_length=256, blank=True, null=True)
 
     def __str__(self):
@@ -27,7 +26,6 @@ def generate_link(sender, instance, **kwargs):
 
 class UserLocation(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE,null=True, blank=True)
-    #token =  models.CharField(max_length=64, unique=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     continent = models.CharField(max_length=64, null=True, blank=True)
@@ -81,6 +79,9 @@ class VisitCount(models.Model):
 
     def __str__(self):
         return f"User: {self.author}, Visit Count: {self.visit_count}"
+
+
+
 
 
 
