@@ -401,7 +401,6 @@ def create_visit(author):
     # Get the track record for the authenticated user, or create a new one if it doesn't exist
     visit, created = VisitCount.objects.get_or_create(
         author=author,
-        today=current_date,
     )
 
     # Increment the total visit count

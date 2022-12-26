@@ -3,3 +3,4 @@
 /test.txt
 /.venv
 /runtime.txt
+db.sqlite3

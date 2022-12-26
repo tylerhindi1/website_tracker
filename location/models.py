@@ -71,7 +71,6 @@ class UserLocation(models.Model):
 class VisitCount(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     visit_count = models.IntegerField(default=0)
-    today = models.DateField(default=date.today())
     today_total = models.IntegerField(default=0)
     monthly_total = models.IntegerField(default=0)
     yearly_total = models.IntegerField(default=0)
