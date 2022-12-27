@@ -1,7 +1,12 @@
 
-
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -10,7 +15,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-i@x^z9uv4+ek1cegkq2(9pj$&5jj=(3z9zxi^w(j436*i1(565'
+# Get the value of the SECRET_KEY environment variable
+
+SECRET_KEY = os.environ["SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -124,10 +131,10 @@ STATICFILES_DIRS = [
 MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 MEDIA_URL = '/media/'
 
-# system envirement variables
-os.environ['SERVER_ADDRESS'] = 'http://127.0.0.1:8000' 
-os.environ['BOT_TOKEN'] = "2046425284:AAGEbPQB0D3UzVh50x278D8qtJVE0LFoMD0"
 
-# save chat id for contct form receiver
-os.environ['CHAT_ID'] = "1703651539"
+
+# system enviroment variables
+SERVER_ADDRESS = os.environ["SERVER_ADDRESS"]
+BOT_TOKEN = os.environ["BOT_TOKEN"]
+CHAT_ID = os.environ["CHAT_ID"]
 
