@@ -4,4 +4,5 @@
 /.venv
 /runtime.txt
 db.sqlite3
-*.sqlite3
+.sqlite3
+
