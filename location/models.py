@@ -63,11 +63,6 @@ class UserLocation(models.Model):
         super().save(*args, **kwargs)
 
 
-
-####################################################################################
-
-
-
 class VisitCount(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     visit_count = models.IntegerField(default=0)
@@ -79,8 +74,12 @@ class VisitCount(models.Model):
     def __str__(self):
         return f"User: {self.author}, Visit Count: {self.visit_count}"
 
+####################################################################################
 
-
-
+class ContactFormData(models.Model):
+    name = models.CharField(max_length=255)
+    email = models.EmailField()
+    message = models.TextField()
+    time = models.DateTimeField(auto_now_add=True)
 
 

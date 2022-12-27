@@ -11,10 +11,12 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from datetime import date, datetime
-from .forms import UserCreateForm
+from datetime import  datetime
+from .forms import UserCreateForm,ContactForm
 from .models import *
-
+import xlwt
+import pytz
+import csv
 
 
 
@@ -131,7 +133,8 @@ def user_track(request):
     yearly_total = VisitCount.objects.get(author=request.user).yearly_total
 
     # data is display to deseding order
-    userdata = UserLocation.objects.order_by('-date', '-time')
+    
+    userdata = UserLocation.objects.order_by('-date','-time')[:100]
     
 
     if request.user.is_authenticated:
@@ -256,11 +259,11 @@ def send_location(request, token):
     if "asname" in ip_data:
         message += "AS Name: " + ip_data["asname"] + "\n"
     if "mobile" in ip_data:
-        message += "Mobile: " + ip_data["mobile"] + "\n"
+        message += "Mobile: {}\n".format(mobile)
     if "proxy" in ip_data:
-        message += "Proxy: " + ip_data["proxy"] + "\n"
+        message += "Proxy:  {}\n".format(proxy)
     if "hosting" in ip_data:
-        message += "Hosting: " + ip_data["hosting"] + "\n"
+        message += "Hosting: {}\n".format(hosting)
 
     # Include the Google Maps URL in the message
     if "lat" in ip_data and "lon" in ip_data:
@@ -434,5 +437,156 @@ def create_visit(author):
     visit.save()
 
 
-#############################################################################################################
+
+# export data as csv format
+def export_csv(request):
+    # get all user locations
+    user_locations = UserLocation.objects.all()
+
+    # create the HttpResponse object with the appropriate CSV header
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="user_locations.csv"'
+
+    # create the CSV writer
+    writer = csv.writer(response)
+
+    # write the header row
+    writer.writerow(['Latitude', 'Longitude', 'Continent', 'Country', 'Region', 'Region Name', 'City', 'District', 'Zip Code', 'Timezone', 'ISP', 'Org', 'AS Number', 'AS Name', 'Mobile', 'Proxy', 'Hosting', 'IP Address', 'Map Link', 'Date', 'Time', 'User Agent'])
+
+    # write the data rows
+    for user_location in user_locations:
+        writer.writerow([ user_location.latitude, user_location.longitude, user_location.continent, user_location.country, user_location.region, user_location.region_name, user_location.city, user_location.district, user_location.zip_code, user_location.timezone, user_location.isp, user_location.org, user_location.as_number, user_location.as_name, user_location.mobile, user_location.proxy, user_location.hosting, user_location.ip_address, user_location.map_link, user_location.date, user_location.time, user_location.user_agent])
+
+    # return the response
+    return response
+
+
+import json
+# export data as json format
+def export_json(request):
+    user_locations = UserLocation.objects.all()
+    data = [
+        {
+            'author': location.author.username,
+            'latitude': location.latitude,
+            'longitude': location.longitude,
+            'continent': location.continent,
+            'country': location.country,
+            'region': location.region,
+            'region_name': location.region_name,
+            'city': location.city,
+            'district': location.district,
+            'zip_code': location.zip_code,
+            'timezone': location.timezone,
+            'isp': location.isp,
+            'org': location.org,
+            'as_number': location.as_number,
+            'as_name': location.as_name,
+            'mobile': location.mobile,
+            'proxy': location.proxy,
+            'hosting': location.hosting,
+            'ip_address': location.ip_address,
+            'map_link': location.map_link,
+            'date': location.date.strftime("%d/%m/%Y"),
+            'time': location.time.strftime("%H:%M:%S"),
+            'user_agent': location.user_agent,
+        }
+        for location in user_locations
+    ]
+    json_data = json.dumps(data)
+    response = HttpResponse(json_data, content_type='application/json')
+    response['Content-Disposition'] = 'attachment; filename=user_locations.json'
+    return response
+
+
+
+
+
+# export data as excel format
+def export_excel(request):
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename=user_locations.xls'
+
+    tz = pytz.timezone('Asia/Kolkata')
+
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet('UserLocations')
+
+    # Sheet header, first row
+    row_num = 0
+
+    font_style = xlwt.XFStyle()
+    font_style.font.bold = True
+
+    columns = ['Author', 'Latitude', 'Longitude', 'Continent', 'Country', 'Region', 'Region Name', 'City', 'District', 'Zip Code', 'Timezone', 'ISP', 'Org', 'AS Number', 'AS Name', 'Mobile', 'Proxy', 'Hosting', 'IP Address', 'Map Link', 'Date', 'Time', 'User Agent']
+
+    for col_num in range(len(columns)):
+        ws.write(row_num, col_num, columns[col_num], font_style)
+
+    # Sheet body, remaining rows
+    font_style = xlwt.XFStyle()
+
+    rows = UserLocation.objects.all().values_list('author__username', 'latitude', 'longitude', 'continent', 'country', 'region', 'region_name', 'city', 'district', 'zip_code', 'timezone', 'isp', 'org', 'as_number', 'as_name', 'mobile', 'proxy', 'hosting', 'ip_address', 'map_link', 'date', 'time', 'user_agent')
+    for row in rows:
+        row_num += 1
+        for col_num in range(len(row)):
+            if col_num == 20:
+                # Set the time zone of the 'date' field
+                ws.write(row_num, col_num, row[col_num].astimezone(tz).strftime("%d/%m/%Y"), font_style)
+            elif col_num == 21:
+                # Convert the 'time' field to a datetime object
+                date = row[20]
+                time = row[21]
+                dt = datetime.combine(date, time, tz)
+                ws.write(row_num, col_num, dt.strftime("%H:%M:%S"), font_style)
+            else:
+                ws.write(row_num, col_num, row[col_num], font_style)
+
+    wb.save(response)
+    return response
+
+
+
+# views.py
+
+
+
+
+# views.py
+
+def contact(request):
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            # Get the name and email fields from the form
+            name = form.cleaned_data['name']
+            email = form.cleaned_data['email']
+            message = form.cleaned_data['message']
+
+
+            # Create a new ContactFormData instance and save it to the database
+            form_data = ContactFormData(name=name, email=email, message=message)
+            form_data.save()
+
+            # Get the current date and time
+            now = datetime.now()
+
+            # Format the date and time as a string
+            time = now.strftime("%H:%M:%S")
+            date = now.strftime("%m/%d/%Y")
+            # Concatenate the name, email, message, and date/time into a single string to send to Telegram
+            text = f'Hello, Administrator!\nName: {name}\nEmail: {email}\nMessage: {message}\nDate: {date}\nTime: {time}'
+
+            # Send the message to the Telegram chat using the bot API
+            chat_id = os.environ['CHAT_ID']
+            bot_token = os.environ['BOT_TOKEN']
+            requests.post(f'https://api.telegram.org/bot{bot_token}/sendMessage', data={'chat_id': chat_id, 'text': text})
+
+            # Redirect the user to the contact page
+            return redirect('contact')
+    else:
+        form = ContactForm()
+    return render(request, 'contacts.html', {'form': form})
+
+
 

@@ -1,4 +1,5 @@
 from django.contrib.auth.forms import UserCreationForm
+from django import forms
 
 class UserCreateForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
@@ -6,3 +7,9 @@ class UserCreateForm(UserCreationForm):
         for fieldname in ['username', 'password1', 'password2']:
             self.fields[fieldname].help_text = None
             self.fields[fieldname].widget.attrs.update({'class': 'form-control'})
+
+
+class ContactForm(forms.Form):
+    name = forms.CharField(label='Your name', max_length=100)
+    email = forms.EmailField(label='Your email')
+    message = forms.CharField(label='Your message', widget=forms.Textarea)

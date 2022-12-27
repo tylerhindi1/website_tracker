@@ -12,4 +12,8 @@ urlpatterns = [
     path('logout/', logoutaccount,name='logoutaccount'),
     path('user_track/', user_track, name='user_track'),
     path('token_summary/', token_summary, name='token_summary'),
+    path('download/excel', export_excel, name='export_excel'),
+    path('download/csv/', export_csv, name='export_csv'),
+    path('download/json/', export_json, name='export_json'),
+
 ]
