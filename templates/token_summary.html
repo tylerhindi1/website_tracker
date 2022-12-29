@@ -33,8 +33,7 @@
                 </div>
                 <br>
                 <div id="message"></div>
-              </div>
-              
+              </div>    
             </div>
           </div>
         </div>
@@ -51,12 +50,10 @@
           clipboard.on('success', function (e) {
             // Get the message element
             var message = document.getElementById('message');
-
             // Set the text of the message element
             message.innerHTML = '<p class="alert alert-success" role="alert" >Code copied to clipboard!</p>';
             // Add a "beautiful" class to the message element
             message.classList.add('beautiful');
-
             // Hide the message after 1 second
             setTimeout(function () {
               message.innerHTML = '';
@@ -66,7 +63,5 @@
       </section>
     </section>
   </section>
-
-
 {% endblock %}
 
