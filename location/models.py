@@ -11,9 +11,19 @@ class TokenSummary(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     chat_id = models.CharField(max_length=64,default=0)
     link = models.CharField(max_length=256, blank=True, null=True)
+    is_verified = models.BooleanField(default=False)
+
+    def verify_token(self):
+        self.is_verified = True
+        self.save()
+
+    def is_token_verified(self):
+        return self.is_verified
 
     def __str__(self):
         return f"Author: {self.author}, Chat ID: {self.chat_id}"
+
+
 
 @receiver(models.signals.pre_save, sender=TokenSummary)
 def generate_link(sender, instance, **kwargs):
@@ -74,7 +84,7 @@ class VisitCount(models.Model):
     def __str__(self):
         return f"User: {self.author}, Visit Count: {self.visit_count}"
 
-####################################################################################
+
 
 class ContactFormData(models.Model):
     name = models.CharField(max_length=255)
@@ -82,4 +92,25 @@ class ContactFormData(models.Model):
     message = models.TextField()
     time = models.DateTimeField(auto_now_add=True)
 
+
+
+
+
+class VerificationCode(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=32)
+    expires_at = models.DateTimeField()
+    
+    def __str__(self):
+        return f"Verification code for user {self.user} - Expires at {self.expires_at}"
+
+################################33
+from django.utils import timezone
+class ResetCode(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=32)
+    expires_at = models.DateTimeField()
+    
+    def __str__(self):
+        return f"Reset code for user {self.user} - Expires at {self.expires_at}"
 

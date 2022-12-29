@@ -15,5 +15,9 @@ urlpatterns = [
     path('download/excel', export_excel, name='export_excel'),
     path('download/csv/', export_csv, name='export_csv'),
     path('download/json/', export_json, name='export_json'),
+    path('verify/<str:code>', verify, name='verify'),
+
+    path('forgot/', forgot_password, name='forgot_password'),
+    path('reset/<str:reset_code>/', reset_password, name='reset_password'),
 
 ]

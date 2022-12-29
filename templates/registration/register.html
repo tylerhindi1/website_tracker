@@ -23,10 +23,18 @@
                         {% if error %}
                         <div class="alert alert-danger mt-3" role="alert">{{ error }}</div>
                         {% endif %}
+                        {% if success %}
+                        <div class="alert alert-success mt-3" role="alert">{{ success }}</div>
+                        {% endif %}
+
                         <form method="POST">
                             {% csrf_token %}
                             <div class="mb-3">
-                                <input class="form-control" type="text" name="username" placeholder="Username"
+                                <input class="form-control" type="username" name="username" placeholder="username"
+                                    required />
+                            </div>
+                            <div class="mb-3">
+                                <input class="form-control" type="email" name="email" placeholder="email"
                                     required />
                             </div>
                             <div class="mb-3">
@@ -43,7 +51,7 @@
                                 </button>
                             </div>
                             <p class="text-muted">
-                                Already have an account?&nbsp;<a href="{% url 'login' %}">Log in</a>
+                                Already have an account?&nbsp;<a style="text-decoration: none; color:#3763f4" href="{% url 'login' %}">Log in</a>
                             </p>
                         </form>
                     </div>

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import UserLocation, TokenSummary, VisitCount,ContactFormData
+from .models import UserLocation, TokenSummary, VisitCount,ContactFormData,VerificationCode, ResetCode
 # Register your models here.
 
 class ContactAdmin(admin.ModelAdmin):
@@ -15,3 +15,5 @@ admin.site.register(UserLocation)
 admin.site.register(TokenSummary, TokenSummaryAdmin)
 admin.site.register(VisitCount, VisitCountAdmin)
 admin.site.register(ContactFormData, ContactAdmin)
+admin.site.register(VerificationCode)
+admin.site.register(ResetCode)
