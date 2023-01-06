@@ -1,5 +1,5 @@
 
-# TrackMySite
+# TrackMyWebsite
 This project allows users to track their location when visiting a website and view their location data in a dashboard. They can also export their location data in CSV, JSON, or Excel format. Additionally, users can send a message to the website administrator through a contact form, and the administrator can receive notifications about new contact form submissions and user location data via Telegram. The project also includes a password reset feature to allow users to reset their password if they forget it.
 
 ## Prerequisites
