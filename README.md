@@ -112,7 +112,4 @@ Contributions are welcome and greatly appreciated. To contribute to the project,
 
 ## License
 
-
-
-
 This project is licensed under the [MIT](https://choosealicense.com/licenses/mit/) License 
